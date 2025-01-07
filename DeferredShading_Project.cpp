@@ -269,7 +269,6 @@ int main() {
     // Load both forward and deferred shaders
     GLuint geometryShader = LoadShader("shaders/geometry_vertex.glsl", "shaders/geometry_fragment.glsl");
     GLuint lightingShader = LoadShader("shaders/lighting_vertex.glsl", "shaders/lighting_fragment.glsl");
-    GLuint debugShader = LoadShader("shaders/debug_vertex.glsl", "shaders/debug_fragment.glsl");
 
 
     // Initialize lights
