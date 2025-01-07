@@ -88,7 +88,7 @@ float quadVertices[] = {
       1.0f,  1.0f, 0.0f,     1.0f, 1.0f
 };
 
-const int NUM_LIGHTS = 32;
+int NUM_LIGHTS = 32;
 // Add to your header file or main.cpp
 struct PointLight {
     glm::vec4 position;  // w component can store radius
@@ -573,6 +573,75 @@ int main() {
             }
         }
         ImGui::Text("%s", currentMode.c_str());
+
+        ImGui::End();
+
+        ImGui::SetNextWindowPos(ImVec2(10, 10));
+        ImGui::Begin("Performance Metrics", nullptr,
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoSavedSettings
+        );
+        ImGui::Text("Controls:");
+        ImGui::Text("WASD - Move Camera");
+        ImGui::Text("Mouse - Look Around");
+        ImGui::Text("Space - Switch Rendering Mode");
+        if (!useForwardRendering) {
+            ImGui::Text("0-5 - Debug Views");
+        }
+        ImGui::End();
+
+        // Add light control window
+
+        ImGui::SetNextWindowPos(ImVec2(250, 10));
+        ImGui::Begin("Light Controls", nullptr,
+            ImGuiWindowFlags_NoTitleBar |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_AlwaysAutoResize |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoSavedSettings
+        );
+
+        static int newNumLights = NUM_LIGHTS;
+        if (ImGui::SliderInt("Number of Lights", &newNumLights, 1, 150)) {
+            if (newNumLights != NUM_LIGHTS) {
+                // Resize lights vector
+                lights.resize(newNumLights);
+
+                // Initialize new lights if we're adding more
+                for (int i = NUM_LIGHTS; i < newNumLights; i++) {
+                    lights[i].position = glm::vec4(
+                        RandomFloat(-1.0f, 1.0f),
+                        RandomFloat(-1.0f, 1.0f),
+                        RandomFloat(-1.0f, 1.0f),
+                        RandomFloat(0.5f, 1.0f)  // radius
+                    );
+                    lights[i].color = glm::vec4(
+                        RandomFloat(0.8f, 1.0f),
+                        RandomFloat(0.8f, 1.0f),
+                        RandomFloat(0.8f, 1.0f),
+                        10.0f  // intensity
+                    );
+                    lights[i].velocity = glm::vec4(
+                        RandomFloat(-1.0f, 1.0f),
+                        RandomFloat(-1.0f, 1.0f),
+                        RandomFloat(-1.0f, 1.0f),
+                        0.0f
+                    );
+                }
+
+                // Update SSBO size
+                glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+                glBufferData(GL_SHADER_STORAGE_BUFFER,
+                    sizeof(PointLight) * lights.size(),
+                    lights.data(),
+                    GL_DYNAMIC_DRAW);
+
+                NUM_LIGHTS = newNumLights;
+            }
+        }
         ImGui::End();
 
         // Render ImGui

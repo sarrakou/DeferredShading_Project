@@ -40,5 +40,5 @@ void main() {
     // Vary color and intensity over time
     float time = deltaTime * index;
     lights[index].color.w = 0.5 + 0.5 * sin(time); // Intensity variation
-    lights[index].position.w = 2.0 + sin(time) * 0.5; // Radius variation
+    lights[index].position.w = 2.0 + sin(time) * 0.05; // Radius variation
 }
