@@ -194,6 +194,8 @@ void processInput(GLFWwindow* window, float deltaTime, GLuint lightingShader) {
         if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
         {
             debugView = 2;
+            // Set and clear background color 
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glUniform1i(glGetUniformLocation(lightingShader, "debugView"), 2);
 
         }
@@ -388,6 +390,8 @@ int main() {
         ImGui::NewFrame();
 
         if (useForwardRendering) {
+            // Set and clear background color 
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // Dark teal background
             // Clear screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

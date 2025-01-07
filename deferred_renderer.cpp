@@ -98,12 +98,6 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
         std::cout << "Warning: debugView uniform not found!" << std::endl;
     }
 
-    // Check for OpenGL errors
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << "OpenGL error before binding textures: " << err << std::endl;
-    }
-
     // Set light positions and colors
     glm::vec3 lightPositions[3] = {
         glm::vec3(0.0f, -0.5f, 1.0f),
@@ -142,18 +136,9 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
     glUniform1i(glGetUniformLocation(lightingShader, "gNormal"), 1);
     glUniform1i(glGetUniformLocation(lightingShader, "gAlbedo"), 2);
     glUniform1i(glGetUniformLocation(lightingShader, "gSpecular"), 3);
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << "OpenGL error after binding textures: " << err << std::endl;
-    }
-
     // Draw quad
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << "OpenGL error after drawing quad: " << err << std::endl;
-    }
 
 }
 

@@ -24,15 +24,14 @@ void main() {
 
     if(debugView == 1) {
         // Position buffer visualization - show depth
-        //float depth = FragPos.z;
-        //FragColor = vec4(vec3(depth * 0.1), 1.0);  
-        FragColor = vec4(FragPos, 1.0);        // Position buffer
+        vec3 pos = FragPos * 0.5 + 0.5;  // Transform from view space to [0,1] range
+        FragColor = vec4(pos, 1.0);      // Position buffer
 
     }
     else if(debugView == 2) {
-        // Normal buffer visualization
-        //FragColor = vec4((Normal + 1.0) * 0.5, 1.0);  // Transform from [-1,1] to [0,1]
-        FragColor = vec4(Normal, 1.0);         // Normal buffer
+        // Normal buffer 
+        vec3 normalColor = Normal * 0.5 + 0.5;  // Transform normal to [0,1] range
+        FragColor = vec4(normalColor, 1.0);
 
     }
     else if(debugView == 3) {
@@ -41,11 +40,18 @@ void main() {
     }
     else if(debugView == 4) {
         // Specular buffer
-        FragColor = vec4(Shininess, Shininess, Shininess, 1.0);  // Specular/shininess
+        vec4 specularValue = texture(gSpecular, TexCoords);
+        vec4 albedoAlpha = texture(gAlbedo, TexCoords);
+        if(albedoAlpha.a < 0.1) {
+            FragColor = vec4(0.0, 0.0, 0.0, 1.0);  // Black for background
+        } else {
+            FragColor = vec4(specularValue.rgb, 1.0);  // White for cube surfaces
+        }
 
     } else if(debugView == 5) {
         float depth = texture(depthTexture, TexCoords).r;
-        FragColor = vec4(vec3(depth), 1.0);    // Depth buffer visualization
+        FragColor = vec4(vec3(depth), 1.0);    
+    
     }
     else {
         // Default deferred lighting

@@ -63,29 +63,12 @@ void LightSphere::GenerateMesh(int segments) {
 }
 
 void LightSphere::Draw() {
-    // Clear any previous errors
-    while (glGetError() != GL_NO_ERROR);
-
-    if (VAO == 0) {
-        std::cout << "Invalid VAO in LightSphere!" << std::endl;
-        return;
-    }
 
     glBindVertexArray(VAO);
 
-    // Check if bound correctly
     GLint currentVAO;
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
-    if (currentVAO != VAO) {
-        std::cout << "Failed to bind VAO!" << std::endl;
-    }
-
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR) {
-        std::cout << "Error in LightSphere::Draw: " << error << std::endl;
-    }
 
     glBindVertexArray(0);
 }
