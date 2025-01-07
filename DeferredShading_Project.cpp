@@ -392,13 +392,23 @@ int main() {
         if (useForwardRendering) {
             // Set and clear background color 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // Dark teal background
+            // Update lights using compute shader (do this for both rendering modes)
+            glUseProgram(computeShader);
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
+            glUniform1f(glGetUniformLocation(computeShader, "deltaTime"), deltaTime);
+            glUniform3f(glGetUniformLocation(computeShader, "boundingBox"), 1.0f, 1.0f, 1.0f);
+
+            int numGroups = (NUM_LIGHTS + 255) / 256;
+            glDispatchCompute(numGroups, 1, 1);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
             // Clear screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            // Use the shader program
+            // Use the forward shader program
             glUseProgram(forwardShader);
 
-            // Set uniform variables for your shader (e.g., transformation matrices, light positions, etc.)
+            // Set matrices
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
             glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -407,23 +417,16 @@ int main() {
             glUniformMatrix4fv(glGetUniformLocation(forwardShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
             glUniformMatrix4fv(glGetUniformLocation(forwardShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-            // Set the light positions and colors
-            for (int i = 0; i < 3; i++) {
-                std::string posName = "lightPos[" + std::to_string(i) + "]";
-                std::string colorName = "lightColor[" + std::to_string(i) + "]";
-                glUniform3fv(glGetUniformLocation(forwardShader, posName.c_str()), 1, glm::value_ptr(lightPositions[i]));
-                glUniform3fv(glGetUniformLocation(forwardShader, colorName.c_str()), 1, glm::value_ptr(lightColors[i]));
-            }
+            // Bind the light SSBO to binding point 0 (same as in the shader)
+            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, lightSSBO);
 
-            // Set view position (camera position)
-            glUniform3f(glGetUniformLocation(forwardShader, "viewPos"), 0.0f, 0.0f, 3.0f);
-
-            // Set object color (can change this to other colors)
+            // Set view position and object color
+            glUniform3fv(glGetUniformLocation(forwardShader, "viewPos"), 1, glm::value_ptr(cameraPos));
             glUniform3f(glGetUniformLocation(forwardShader, "objectColor"), 0.3f, 0.3f, 0.3f);
 
             // Draw the cube
             glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 36);  // Draw the cube with 36 vertices (6 faces, 2 triangles per face)
+            glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindVertexArray(0);
         }
         else {  // Deferred rendering mode

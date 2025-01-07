@@ -9,18 +9,17 @@ uniform mat4 projection;
 
 out vec3 FragPos;
 out vec3 Normal;
-out vec2 TexCoord;
+out vec2 TexCoords;
 
 void main() {
-    // Transform to view space first, like deferred shader
+    // Transform to view space first
     vec4 viewPos = view * model * vec4(aPos, 1.0);
     FragPos = viewPos.xyz;
     
     // Transform normals to view space
     Normal = mat3(transpose(inverse(view * model))) * aNormal;
     
-    TexCoord = aTexCoord;
+    TexCoords = aTexCoord;
     
-    // Final position using projection
     gl_Position = projection * viewPos;
 }
