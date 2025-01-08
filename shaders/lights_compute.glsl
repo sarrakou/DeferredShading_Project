@@ -1,11 +1,10 @@
-// lights_compute.glsl
 #version 450
 
-layout(local_size_x = 256) in;  // Add this line
+layout(local_size_x = 256) in;  
 
 struct PointLight {
-    vec4 position;  // w is radius
-    vec4 color;     // w is intensity
+    vec4 position; 
+    vec4 color;  
     vec4 velocity;
 };
 
@@ -14,16 +13,14 @@ layout(std430, binding = 0) buffer LightBuffer {
 };
 
 uniform float deltaTime;
-uniform vec3 boundingBox;  // Scene boundaries
+uniform vec3 boundingBox; 
 
 void main() {
     uint index = gl_GlobalInvocationID.x;
     if (index >= lights.length()) return;
 
-    // Update position
     lights[index].position.xyz += lights[index].velocity.xyz * deltaTime;
 
-    // Bounce off boundaries
     vec3 pos = lights[index].position.xyz;
     vec3 vel = lights[index].velocity.xyz;
     
@@ -37,7 +34,6 @@ void main() {
         lights[index].velocity.z = -vel.z;
     }
 
-    // Vary color and intensity over time
     float time = deltaTime * index;
     lights[index].color.w = 0.5 + 0.5 * sin(time); // Intensity variation
     lights[index].position.w = 2.0 + sin(time) * 0.05; // Radius variation

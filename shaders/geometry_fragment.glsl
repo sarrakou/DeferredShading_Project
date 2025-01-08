@@ -9,7 +9,7 @@ in vec3 Normal;
 in vec2 TexCoords;
 
 void main() {
-    // Store the view-space position
+    //viewspace position
     float depth = gl_FragCoord.z;
     gPosition = vec4(FragPos, depth);  // Store depth in w component
     gNormal = normalize(Normal);

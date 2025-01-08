@@ -13,7 +13,6 @@ struct GBuffer {
 
 class DeferredRenderer {
 public:
-    // Add getter for g-buffer textures
     GLuint getPositionTexture() const { return gBuffer.gPosition; }
     GLuint getNormalTexture() const { return gBuffer.gNormal; }
     GLuint getAlbedoTexture() const { return gBuffer.gAlbedo; }

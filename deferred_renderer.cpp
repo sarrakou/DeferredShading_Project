@@ -5,11 +5,11 @@
 
 DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height)
     : SCR_WIDTH(width), SCR_HEIGHT(height) {
-    // Create framebuffer
+    // framebuffer
     glGenFramebuffers(1, &gBuffer.gBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.gBuffer);
 
-    // Position buffer
+    //position buffer
     glGenTextures(1, &gBuffer.gPosition);
     glBindTexture(GL_TEXTURE_2D, gBuffer.gPosition);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -17,7 +17,7 @@ DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gBuffer.gPosition, 0);
 
-    // Normal buffer
+    //normal buffer
     glGenTextures(1, &gBuffer.gNormal);
     glBindTexture(GL_TEXTURE_2D, gBuffer.gNormal);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
@@ -25,7 +25,7 @@ DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gBuffer.gNormal, 0);
 
-    // Albedo buffer
+    // albedo buffer
     glGenTextures(1, &gBuffer.gAlbedo);
     glBindTexture(GL_TEXTURE_2D, gBuffer.gAlbedo);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -33,7 +33,7 @@ DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gBuffer.gAlbedo, 0);
 
-    // Specular buffer
+    //specular buffer
     glGenTextures(1, &gBuffer.gSpecular);
     glBindTexture(GL_TEXTURE_2D, gBuffer.gSpecular);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -41,19 +41,18 @@ DeferredRenderer::DeferredRenderer(unsigned int width, unsigned int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gBuffer.gSpecular, 0);
 
-    // Tell OpenGL which attachments we'll use
+    // choisie les attachments
     GLuint attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
                              GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, attachments);
 
-    // Create and attach depth buffer
+    // créer et attacher le depth buffer
     glGenRenderbuffers(1, &gBuffer.rboDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, gBuffer.rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
         GL_RENDERBUFFER, gBuffer.rboDepth);
 
-    // Check framebuffer completion
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
 
@@ -68,7 +67,6 @@ void DeferredRenderer::geometryPass(GLuint geometryShader, GLuint VAO,
     glBindFramebuffer(GL_FRAMEBUFFER, gBuffer.gBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Check uniforms before setting them
     GLint projLoc = glGetUniformLocation(geometryShader, "projection");
     GLint viewLoc = glGetUniformLocation(geometryShader, "view");
     GLint modelLoc = glGetUniformLocation(geometryShader, "model");
@@ -92,13 +90,10 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
 
     glUseProgram(lightingShader);
 
-    // Check debugView value and uniform location
     GLint debugLoc = glGetUniformLocation(lightingShader, "debugView");
     if (debugLoc == -1) {
         std::cout << "Warning: debugView uniform not found!" << std::endl;
     }
-
-    // Set light positions and colors
     glm::vec3 lightPositions[3] = {
         glm::vec3(0.0f, -0.5f, 1.0f),
         glm::vec3(0.5f, 0.0f, 1.0f),
@@ -106,12 +101,11 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
     };
 
     glm::vec3 lightColors[3] = {
-        glm::vec3(1.0f, 1.0f, 1.0f), // White light
-        glm::vec3(1.0f, 0.0f, -0.5f), // Red light
-        glm::vec3(-0.5f, 0.0f, 1.0f)  // Blue light
+        glm::vec3(1.0f, 1.0f, 1.0f), // blanc
+        glm::vec3(1.0f, 0.0f, -0.5f), // rouge
+        glm::vec3(-0.5f, 0.0f, 1.0f)  //bleu
     };
 
-    // Set light uniforms
     for (int i = 0; i < 3; i++) {
         std::string posName = "lightPositions[" + std::to_string(i) + "]";
         std::string colorName = "lightColors[" + std::to_string(i) + "]";
@@ -119,10 +113,8 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
         glUniform3fv(glGetUniformLocation(lightingShader, colorName.c_str()), 1, glm::value_ptr(lightColors[i]));
     }
 
-    // Set view position
     glUniform3fv(glGetUniformLocation(lightingShader, "viewPos"), 1, glm::value_ptr(cameraPos));
 
-    // Bind G-Buffer textures
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, gBuffer.gPosition);
     glActiveTexture(GL_TEXTURE1);
@@ -136,7 +128,7 @@ void DeferredRenderer::lightingPass(GLuint lightingShader, GLuint quadVAO, const
     glUniform1i(glGetUniformLocation(lightingShader, "gNormal"), 1);
     glUniform1i(glGetUniformLocation(lightingShader, "gAlbedo"), 2);
     glUniform1i(glGetUniformLocation(lightingShader, "gSpecular"), 3);
-    // Draw quad
+
     glBindVertexArray(quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -157,9 +149,8 @@ void DeferredRenderer::debugView(GLuint debugShader, GLuint quadVAO) {
 
     glUseProgram(debugShader);
 
-    // Bind G-Buffer texture
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gBuffer.gPosition);  // Change this to view different buffers
+    glBindTexture(GL_TEXTURE_2D, gBuffer.gPosition); 
     glUniform1i(glGetUniformLocation(debugShader, "gBuffer"), 0);
 
     glBindVertexArray(quadVAO);

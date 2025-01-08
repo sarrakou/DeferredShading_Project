@@ -12,16 +12,13 @@ uniform mat4 view;
 uniform mat4 projection;
 
 void main() {
-    // Calculate view-space position
     vec4 viewPos = view * model * vec4(aPos, 1.0);
     FragPos = viewPos.xyz;
     
-    // Transform normal to view space
+    //transformation de la normale to view space
     mat3 normalMatrix = mat3(transpose(inverse(view * model)));
     Normal = normalMatrix * aNormal;
     
     TexCoords = aTexCoords;
-    
-    // Final position
     gl_Position = projection * viewPos;
 }

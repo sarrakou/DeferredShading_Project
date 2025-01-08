@@ -12,11 +12,11 @@ out vec3 Normal;
 out vec2 TexCoords;
 
 void main() {
-    // Transform to view space first
+    // transformation to view space 
     vec4 viewPos = view * model * vec4(aPos, 1.0);
     FragPos = viewPos.xyz;
     
-    // Transform normals to view space
+    //transformation des normales to view space
     Normal = mat3(transpose(inverse(view * model))) * aNormal;
     
     TexCoords = aTexCoord;
